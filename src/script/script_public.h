@@ -75,7 +75,9 @@ union VariableUnion
 	unsigned int stringValue;
 	const float *vectorValue;
 	const char *codePosValue;
-	uintptr_t pointerValue;
+	unsigned int pointerValue;
+	void (*func)();
+	void (*meth)(scr_entref_t);
 	VariableStackBuffer *stackValue;
 	unsigned int entityOffset;
 };
@@ -385,6 +387,12 @@ extern scrAnimGlob_t scrAnimGlob;
 
 #define SCR_FUNC_TABLE_SIZE 1024
 
+union func_table_u
+{
+	void (*f)();
+	void (*m)(scr_entref_t);
+};
+
 typedef struct scrCompilePub_s
 {
 	int value_count;
@@ -402,7 +410,7 @@ typedef struct scrCompilePub_s
 	byte *opcodePos;
 	unsigned int programLen;
 	int func_table_size;
-	intptr_t func_table[SCR_FUNC_TABLE_SIZE];
+	func_table_u func_table[SCR_FUNC_TABLE_SIZE];
 } scrCompilePub_t;
 
 extern scrCompilePub_t scrCompilePub;
@@ -921,7 +929,7 @@ void Scr_Error(const char *error);
 void Scr_ErrorInternal();
 void Scr_ObjectError(const char *error);
 void Scr_ParamError(unsigned int index, const char *error);
-int Scr_GetType(unsigned int param);
+int Scr_GetType(unsigned long index);
 unsigned int Scr_GetNumParam();
 void Scr_AddUndefined();
 void Scr_AddBool(bool value);
@@ -929,7 +937,7 @@ void Scr_AddInt(int value);
 void Scr_AddInt64(long int value);
 void Scr_AddFloat(float value);
 void Scr_AddAnim(scr_anim_s value);
-void Scr_AddObject(uintptr_t id);
+void Scr_AddObject(unsigned int id);
 void Scr_AddEntityNum(int entnum, int classnum);
 void Scr_AddString(const char *value);
 void Scr_AddIString(const char *value);
@@ -938,32 +946,32 @@ void Scr_AddVector(const float *value);
 void Scr_MakeArray();
 void Scr_AddArray();
 void Scr_AddArrayStringIndexed(unsigned int stringValue);
-int Scr_GetPointerType(unsigned int index);
-scr_entref_t Scr_GetEntityRef( unsigned int index );
+int Scr_GetPointerType(unsigned long index);
+scr_entref_t Scr_GetEntityRef( unsigned long index );
 unsigned short Scr_ExecEntThreadNum(int entnum, int classnum, int handle, unsigned int paramcount);
 void Scr_FreeThread(unsigned short handle);
-int Scr_GetInt(unsigned int index);
-long int Scr_GetInt64(unsigned int index);
-float Scr_GetFloat(unsigned int index);
-unsigned int Scr_GetConstString(unsigned int index);
-unsigned int Scr_GetConstStringIncludeNull(unsigned int index);
+int Scr_GetInt(unsigned long index);
+long int Scr_GetInt64(unsigned long index);
+float Scr_GetFloat(unsigned long index);
+unsigned int Scr_GetConstString(unsigned long index);
+unsigned int Scr_GetConstStringIncludeNull(unsigned long index);
 unsigned int Scr_AllocString(const char *string);
 const char* Scr_GetString(unsigned int index);
-unsigned int Scr_GetConstIString(unsigned int index);
+unsigned int Scr_GetConstIString(unsigned long index);
 const char* Scr_GetIString(unsigned int index);
 VariableValue GetEntityFieldValue(unsigned int classnum, int entnum, int offset);
 bool SetEntityFieldValue(unsigned int classnum, int entnum, int offset, VariableValue *value);
-void Scr_GetVector(unsigned int index, float *vector);
+void Scr_GetVector(unsigned long index, vec3_t vector);
 void VM_CancelNotify(unsigned int notifyListOwnerId, unsigned int startLocalId);
 void VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue, VariableValue *top);
-void Scr_NotifyNum(int entnum, int classnum, unsigned int stringValue, unsigned int paramcount);
-scr_anim_s Scr_GetAnim(unsigned int index, struct XAnimTree_s *tree);
-const char* Scr_GetTypeName(unsigned int index);
-unsigned int Scr_GetConstLowercaseString(unsigned int index);
-unsigned int Scr_GetObject(unsigned int paramnum);
+void Scr_NotifyNum(int entnum, int classnum, unsigned int stringValue, unsigned long paramcount);
+scr_anim_s Scr_GetAnim(unsigned long index, struct XAnimTree_s *tree);
+const char* Scr_GetTypeName(unsigned long index);
+unsigned int Scr_GetConstLowercaseString(unsigned long index);
+unsigned int Scr_GetObject(unsigned long index);
 void Scr_SetStructField(unsigned int structId, unsigned int index);
 
-unsigned int VM_Execute(unsigned int localId, const char *pos, unsigned int paramcount);
+unsigned int VM_Execute(unsigned int localId, const char *pos, unsigned long paramcount);
 
 void Scr_IncTime();
 void Scr_DecTime();
@@ -1139,7 +1147,6 @@ void Scr_FreeEntityNum(int entnum, int classnum);
 unsigned int GetVariableKeyObject(unsigned int id);
 unsigned int Scr_EvalFieldObject(unsigned int tempVariable, VariableValue *value);
 unsigned int Scr_EvalVariableObject(unsigned int id);
-union VariableValueInternal_u* GetVariableValueAddress_Bad(unsigned int id);
 union VariableUnion* GetVariableValueAddress(unsigned int id);
 unsigned int Scr_GetThreadWaitTime(unsigned int startLocalId);
 void Scr_KillEndonThread(unsigned int threadId);
@@ -1252,7 +1259,7 @@ void Scr_FreeScripts();
 void Scr_RunCurrentThreads();
 void Scr_ClearOutParams();
 
-const char* Scr_GetDebugString(unsigned int index);
+const char* Scr_GetDebugString(unsigned long index);
 void Scr_CastDebugString(VariableValue *value);
 
 void Scr_PrintPrevCodePos(conChannel_t channel, const char *codePos, unsigned int index);

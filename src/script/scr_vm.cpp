@@ -60,16 +60,6 @@ unsigned int Scr_GetLocalVar( const char *pos )
 	return Scr_GetLocalVarAtIndex( *(unsigned char *)pos );
 }
 
-static VariableValue* Scr_GetStackValue( unsigned int index )
-{
-	return &scrVmPub.top[-static_cast<int>(index)];
-}
-
-static VariableValue* Scr_GetStackValue( VariableValue *top, unsigned int index )
-{
-	return &top[-static_cast<int>(index)];
-}
-
 /*
 ==============
 Scr_ReadShort
@@ -143,7 +133,7 @@ unsigned short Scr_ReadUnsignedShort( const char **pos )
 Scr_ReadUnsigned
 ==============
 */
-unsigned int Scr_ReadUnsigned( const char **pos )
+unsigned long Scr_ReadUnsigned( const char **pos )
 {
 	unsigned int value;
 	memcpy(&value, *pos, sizeof(value));
@@ -363,7 +353,7 @@ void Scr_Error( const char *error )
 Scr_GetPointerType
 ==============
 */
-int Scr_GetPointerType( unsigned int index )
+int Scr_GetPointerType( unsigned long index )
 {
 	VariableValue *value;
 
@@ -373,7 +363,7 @@ int Scr_GetPointerType( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( value->type != VAR_POINTER )
 	{
@@ -389,7 +379,7 @@ int Scr_GetPointerType( unsigned int index )
 Scr_GetTypeName
 ==============
 */
-const char* Scr_GetTypeName( unsigned int index )
+const char* Scr_GetTypeName( unsigned long index )
 {
 	VariableValue *value;
 
@@ -399,7 +389,7 @@ const char* Scr_GetTypeName( unsigned int index )
 		return NULL;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 	return var_typename[value->type];
 }
 
@@ -408,7 +398,7 @@ const char* Scr_GetTypeName( unsigned int index )
 Scr_GetType
 ==============
 */
-int Scr_GetType( unsigned int index )
+int Scr_GetType( unsigned long index )
 {
 	VariableValue *value;
 
@@ -418,7 +408,7 @@ int Scr_GetType( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 	return value->type;
 }
 
@@ -427,7 +417,7 @@ int Scr_GetType( unsigned int index )
 Scr_GetObject
 ==============
 */
-unsigned int Scr_GetObject( unsigned int index )
+unsigned int Scr_GetObject( unsigned long index )
 {
 	VariableValue *value;
 
@@ -437,7 +427,7 @@ unsigned int Scr_GetObject( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( value->type != VAR_POINTER )
 	{
@@ -454,7 +444,7 @@ unsigned int Scr_GetObject( unsigned int index )
 Scr_GetEntityRef
 ==============
 */
-scr_entref_t Scr_GetEntityRef( unsigned int index )
+scr_entref_t Scr_GetEntityRef( unsigned long index )
 {
 	VariableValue *value;
 	unsigned int id;
@@ -470,7 +460,7 @@ scr_entref_t Scr_GetEntityRef( unsigned int index )
 		return entref;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( value->type != VAR_POINTER )
 	{
@@ -496,7 +486,7 @@ scr_entref_t Scr_GetEntityRef( unsigned int index )
 Scr_GetFunc
 ==============
 */
-unsigned int Scr_GetFunc( unsigned int index )
+unsigned int Scr_GetFunc( unsigned long index )
 {
 	VariableValue *value;
 
@@ -506,7 +496,7 @@ unsigned int Scr_GetFunc( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( value->type != VAR_FUNCTION )
 	{
@@ -523,7 +513,7 @@ unsigned int Scr_GetFunc( unsigned int index )
 Scr_GetVector
 ==============
 */
-void Scr_GetVector( unsigned int index, vec3_t vectorValue )
+void Scr_GetVector( unsigned long index, vec3_t vectorValue )
 {
 	VariableValue *value;
 
@@ -533,7 +523,7 @@ void Scr_GetVector( unsigned int index, vec3_t vectorValue )
 		return;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( value->type != VAR_VECTOR )
 	{
@@ -550,7 +540,7 @@ void Scr_GetVector( unsigned int index, vec3_t vectorValue )
 Scr_GetConstIString
 ==============
 */
-unsigned int Scr_GetConstIString( unsigned int index )
+unsigned int Scr_GetConstIString( unsigned long index )
 {
 	VariableValue *value;
 
@@ -560,7 +550,7 @@ unsigned int Scr_GetConstIString( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( value->type != VAR_ISTRING )
 	{
@@ -577,7 +567,7 @@ unsigned int Scr_GetConstIString( unsigned int index )
 Scr_GetFloat
 ==============
 */
-float Scr_GetFloat( unsigned int index )
+float Scr_GetFloat( unsigned long index )
 {
 	VariableValue *value;
 
@@ -587,7 +577,7 @@ float Scr_GetFloat( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	// cast to float
 	if ( value->type == VAR_INTEGER )
@@ -610,7 +600,7 @@ float Scr_GetFloat( unsigned int index )
 Scr_GetInt
 ==============
 */
-int Scr_GetInt( unsigned int index )
+int Scr_GetInt( unsigned long index )
 {
 	VariableValue *value;
 
@@ -620,7 +610,7 @@ int Scr_GetInt( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( value->type != VAR_INTEGER )
 	{
@@ -636,7 +626,7 @@ int Scr_GetInt( unsigned int index )
 Scr_GetInt64
 ==============
 */
-long int Scr_GetInt64( unsigned int index )
+long int Scr_GetInt64( unsigned long index )
 {
 	VariableValue *value;
 
@@ -646,7 +636,7 @@ long int Scr_GetInt64( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( value->type != VAR_INT64 )
 	{
@@ -849,7 +839,7 @@ void Scr_AddArray()
 Scr_GetAnimTree
 ==============
 */
-scr_animtree_t Scr_GetAnimTree( unsigned int index ) // untested
+scr_animtree_t Scr_GetAnimTree( unsigned long index ) // untested
 {
 	VariableValue *value;
 	scr_animtree_t tree;
@@ -862,7 +852,7 @@ scr_animtree_t Scr_GetAnimTree( unsigned int index ) // untested
 		return tree;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( value->type != VAR_INTEGER )
 	{
@@ -901,7 +891,7 @@ scr_animtree_t Scr_GetAnimTree( unsigned int index ) // untested
 Scr_GetAnim
 ==============
 */
-scr_anim_s Scr_GetAnim( unsigned int index, XAnimTree_s *tree )
+scr_anim_s Scr_GetAnim( unsigned long index, XAnimTree_s *tree )
 {
 	VariableValue *value;
 	scr_anim_s anim;
@@ -916,7 +906,7 @@ scr_anim_s Scr_GetAnim( unsigned int index, XAnimTree_s *tree )
 		return anim;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( value->type != VAR_ANIMATION )
 	{
@@ -979,7 +969,7 @@ void Scr_ClearOutParams()
 Scr_GetConstLowercaseString
 ==============
 */
-unsigned int Scr_GetConstLowercaseString( unsigned int index )
+unsigned int Scr_GetConstLowercaseString( unsigned long index )
 {
 	unsigned int stringValue;
 	VariableValue *value;
@@ -993,7 +983,7 @@ unsigned int Scr_GetConstLowercaseString( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( !Scr_CastString(value) )
 	{
@@ -1028,7 +1018,7 @@ unsigned int Scr_GetConstLowercaseString( unsigned int index )
 Scr_GetConstString
 ==============
 */
-unsigned int Scr_GetConstString( unsigned int index )
+unsigned int Scr_GetConstString( unsigned long index )
 {
 	VariableValue *value;
 
@@ -1038,7 +1028,7 @@ unsigned int Scr_GetConstString( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
+	value = &scrVmPub.top[-index];
 
 	if ( !Scr_CastString(value) )
 	{
@@ -1086,7 +1076,7 @@ void Scr_Shutdown()
 Scr_GetDebugString
 ==============
 */
-const char* Scr_GetDebugString( unsigned int index )
+const char* Scr_GetDebugString( unsigned long index )
 {
 	VariableValue *value;
 
@@ -1096,8 +1086,7 @@ const char* Scr_GetDebugString( unsigned int index )
 		return 0;
 	}
 
-	value = Scr_GetStackValue(index);
-
+	value = &scrVmPub.top[-index];
 	Scr_CastDebugString(value);
 
 	assert(value->type == VAR_STRING);
@@ -1109,7 +1098,7 @@ const char* Scr_GetDebugString( unsigned int index )
 Scr_GetStringIncludeNull
 ==============
 */
-const char* Scr_GetStringIncludeNull( unsigned int index )
+const char* Scr_GetStringIncludeNull( unsigned long index )
 {
 	return SL_ConvertToString( Scr_GetConstString( index ) );
 }
@@ -1119,9 +1108,9 @@ const char* Scr_GetStringIncludeNull( unsigned int index )
 Scr_GetConstStringIncludeNull
 ==============
 */
-unsigned int Scr_GetConstStringIncludeNull( unsigned int index )
+unsigned int Scr_GetConstStringIncludeNull( unsigned long index )
 {
-	if ( index < scrVmPub.outparamcount && Scr_GetStackValue(index)->type == VAR_UNDEFINED )
+	if ( index < scrVmPub.outparamcount && scrVmPub.top[-index].type == VAR_UNDEFINED )
 	{
 		return 0;
 	}
@@ -1456,7 +1445,7 @@ void Scr_AddString( const char *value )
 Scr_AddObject
 ==============
 */
-void Scr_AddObject( uintptr_t id )
+void Scr_AddObject( unsigned int id )
 {
 	assert(id);
 	assert(GetObjectType( id ) != VAR_THREAD);
@@ -1607,7 +1596,7 @@ VariableValue GetEntityFieldValue( unsigned int classnum, int entnum, int offset
 Scr_NotifyNum
 ==============
 */
-void Scr_NotifyNum( int entnum, int classnum, unsigned int stringValue, unsigned int paramcount )
+void Scr_NotifyNum( int entnum, int classnum, unsigned int stringValue, unsigned long paramcount )
 {
 	int type;
 	VariableValue *startTop;
@@ -1618,7 +1607,7 @@ void Scr_NotifyNum( int entnum, int classnum, unsigned int stringValue, unsigned
 
 	Scr_ClearOutParams();
 
-	startTop = Scr_GetStackValue(paramcount);
+	startTop = &scrVmPub.top[-paramcount];
 	paramcount = scrVmPub.inparamcount - paramcount;
 
 	id = FindEntityId(entnum, classnum);
@@ -2998,7 +2987,7 @@ void VM_Resume( unsigned int timeId )
 VM_Execute
 ==============
 */
-unsigned int VM_Execute( unsigned int localId, const char *pos, unsigned int paramcount )
+unsigned int VM_Execute( unsigned int localId, const char *pos, unsigned long paramcount )
 {
 	int type;
 	VariableValue *startTop;
@@ -3006,7 +2995,7 @@ unsigned int VM_Execute( unsigned int localId, const char *pos, unsigned int par
 	assert(paramcount <= scrVmPub.inparamcount);
 	Scr_ClearOutParams();
 
-	startTop = Scr_GetStackValue(paramcount);
+	startTop = &scrVmPub.top[-paramcount];
 	paramcount = scrVmPub.inparamcount - paramcount;
 
 	// overflow
@@ -3955,7 +3944,7 @@ CallBuiltin:
 			builtinIndex = Scr_ReadUnsignedShort(&pos);
 			scrVmPub.function_frame->fs.pos = pos;
 
-			((void (*)(void))scrCompilePub.func_table[builtinIndex])();
+			scrCompilePub.func_table[builtinIndex].f();
 			goto post_builtin;
 
 		case OP_CallBuiltinMethod0:
@@ -3997,7 +3986,7 @@ CallBuiltinMethod:
 			RemoveRefToObject(objectId);
 			scrVmPub.function_frame->fs.pos = pos;
 
-			((void (*)(scr_entref_t))scrCompilePub.func_table[builtinIndex])(entref);
+			scrCompilePub.func_table[builtinIndex].m(entref);
 post_builtin:
 			top = scrVmPub.top;
 			pos = scrVmPub.function_frame->fs.pos;
@@ -4244,7 +4233,7 @@ function_call:
 			scrVmPub.function_frame->fs.startTop = startTop;
 
 			pos = Scr_ReadCodePos(&scrVmPub.function_frame->fs.pos);
-			startTop = Scr_GetStackValue(top, Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos));
+			startTop = &top[-Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos)];
 thread_call:
 			scrVmPub.function_frame->fs.top = startTop;
 			scrVmPub.function_frame->topType = startTop->type;
@@ -4279,7 +4268,7 @@ thread_call:
 			scrVmPub.function_frame->fs.startTop = startTop;
 
 			pos = tempCodePos;
-			startTop = Scr_GetStackValue(top, Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos));
+			startTop = &top[-Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos)];
 			goto thread_call;
 
 		case OP_ScriptMethodThreadCall:
@@ -4304,7 +4293,7 @@ thread_call:
 			scrVmPub.function_frame->fs.startTop = startTop;
 
 			pos = Scr_ReadCodePos(&scrVmPub.function_frame->fs.pos);
-			startTop = Scr_GetStackValue(top, Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos));
+			startTop = &top[-Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos)];
 			goto thread_call;
 
 		case OP_ScriptMethodThreadCallPointer:
@@ -4341,7 +4330,7 @@ thread_call:
 			scrVmPub.function_frame->fs.startTop = startTop;
 
 			pos = tempCodePos;
-			startTop = Scr_GetStackValue(top, Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos));
+			startTop = &top[-Scr_ReadUnsigned(&scrVmPub.function_frame->fs.pos)];
 			goto thread_call;
 
 		case OP_DecTop:

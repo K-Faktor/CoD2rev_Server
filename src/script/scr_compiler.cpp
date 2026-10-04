@@ -840,13 +840,13 @@ void Scr_BeginDevScript( int *type, char **savedPos )
 AddFunction
 ============
 */
-int AddFunction( intptr_t func )
+int AddFunction( void (*func)() )
 {
 	int i;
 
 	for ( i = 0; i < scrCompilePub.func_table_size; i++ )
 	{
-		if ( scrCompilePub.func_table[i] == func )
+		if ( scrCompilePub.func_table[i].f == func )
 		{
 			return i;
 		}
@@ -859,7 +859,37 @@ int AddFunction( intptr_t func )
 		Com_Error(ERR_DROP, "SCR_FUNC_TABLE_SIZE exceeded");
 	}
 
-	scrCompilePub.func_table[scrCompilePub.func_table_size] = func;
+	scrCompilePub.func_table[scrCompilePub.func_table_size].f = func;
+	scrCompilePub.func_table_size++;
+
+	return i;
+}
+
+/*
+============
+AddMethod
+============
+*/
+int AddMethod( void (*meth)(scr_entref_t) )
+{
+	int i;
+
+	for ( i = 0; i < scrCompilePub.func_table_size; i++ )
+	{
+		if ( scrCompilePub.func_table[i].m == meth )
+		{
+			return i;
+		}
+	}
+
+	assert(i == scrCompilePub.func_table_size);
+
+	if ( scrCompilePub.func_table_size == SCR_FUNC_TABLE_SIZE )
+	{
+		Com_Error(ERR_DROP, "SCR_FUNC_TABLE_SIZE exceeded");
+	}
+
+	scrCompilePub.func_table[scrCompilePub.func_table_size].m = meth;
 	scrCompilePub.func_table_size++;
 
 	return i;
@@ -4054,7 +4084,7 @@ void EmitMethod( sval_u expr, sval_u func_name, sval_u params, sval_u methodSour
 		value = Scr_EvalVariable(methId);
 		type = Scr_GetUncacheType(value.type);
 
-		meth = (void (*)(scr_entref_t))value.u.pointerValue;
+		meth = value.u.meth;
 	}
 	else
 	{
@@ -4064,7 +4094,7 @@ void EmitMethod( sval_u expr, sval_u func_name, sval_u params, sval_u methodSour
 		methId = GetNewVariable(scrCompilePub.builtinMeth, name);
 
 		value.type = Scr_GetCacheType(type);
-		value.u.pointerValue = (intptr_t)meth;
+		value.u.meth = meth;
 
 		SetVariableValue(methId, &value);
 	}
@@ -4112,7 +4142,7 @@ void EmitMethod( sval_u expr, sval_u func_name, sval_u params, sval_u methodSour
 	Scr_CompileRemoveRefToString(name);
 	EmitCallBuiltinMethodOpcode(param_count, sourcePos);
 
-	EmitUnsignedShort( AddFunction( (intptr_t)meth ) );
+	EmitUnsignedShort( AddMethod( meth ) );
 
 	AddOpcodePos(methodSourcePos.sourcePosValue, SOURCE_TYPE_NONE);
 	AddExpressionListOpcodePos(params);
@@ -4169,7 +4199,7 @@ void EmitCall( sval_u func_name, sval_u params, bool bStatement, scr_block_s *bl
 		value = Scr_EvalVariable(funcId);
 		type = Scr_GetUncacheType(value.type);
 
-		func = (void (*)())value.u.pointerValue;
+		func = value.u.func;
 	}
 	else
 	{
@@ -4179,7 +4209,7 @@ void EmitCall( sval_u func_name, sval_u params, bool bStatement, scr_block_s *bl
 		funcId = GetNewVariable(scrCompilePub.builtinFunc, name);
 
 		value.type = Scr_GetCacheType(type);
-		value.u.pointerValue = (intptr_t)func;
+		value.u.func = func;
 
 		SetVariableValue(funcId, &value);
 	}
@@ -4223,7 +4253,7 @@ void EmitCall( sval_u func_name, sval_u params, bool bStatement, scr_block_s *bl
 	Scr_CompileRemoveRefToString(name);
 	EmitCallBuiltinOpcode(param_count, sourcePos);
 
-	EmitUnsignedShort( AddFunction( (intptr_t)func ) );
+	EmitUnsignedShort( AddFunction( func ) );
 
 	AddExpressionListOpcodePos(params);
 
