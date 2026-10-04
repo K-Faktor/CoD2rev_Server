@@ -3064,7 +3064,7 @@ unsigned int VM_Execute( unsigned int localId, const char *pos, unsigned long pa
 VM_Execute
 ==============
 */
-unsigned int VM_Execute( const char *pos, unsigned int localId, unsigned int localVarCount, VariableValue *top, VariableValue *startTop )
+unsigned int __attribute__((optimize("O0"))) VM_Execute( const char *pos, unsigned int localId, unsigned int localVarCount, VariableValue *top, VariableValue *startTop )
 {
 	int jumpOffset, entnum, gCaseCount, waitTime;
 	unsigned int parentLocalId, builtinIndex, stringValue, id, threadId, classnum, removeCount;
