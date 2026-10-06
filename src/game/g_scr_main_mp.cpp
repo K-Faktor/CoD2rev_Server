@@ -3451,7 +3451,7 @@ GScr_atan
 */
 void GScr_atan()
 {
-	Scr_AddFloat( atan(Scr_GetFloat(0)) * DEGINRAD );
+	Scr_AddFloat( atan(Scr_GetFloat(0)) * RAD_TO_DEG );
 }
 
 /*
@@ -3468,7 +3468,7 @@ void GScr_acos()
 		Scr_Error(va("%g out of range", n));
 	}
 
-	Scr_AddFloat( acos(n) * DEGINRAD );
+	Scr_AddFloat( acos(n) * RAD_TO_DEG );
 }
 
 /*
@@ -3485,7 +3485,7 @@ void GScr_asin()
 		Scr_Error(va("%g out of range", n));
 	}
 
-	Scr_AddFloat( asin(n) * DEGINRAD );
+	Scr_AddFloat( asin(n) * RAD_TO_DEG );
 }
 
 /*
@@ -3498,7 +3498,7 @@ void GScr_tan()
 	float sinT;
 	float cosT;
 
-	FastSinCos(Scr_GetFloat(0) * RADINDEG, &sinT, &cosT);
+	FastSinCos(Scr_GetFloat(0) * DEG_TO_RAD, &sinT, &cosT);
 
 	if ( cosT == 0 )
 	{
@@ -3515,7 +3515,7 @@ GScr_cos
 */
 void GScr_cos()
 {
-	Scr_AddFloat( cos(Scr_GetFloat(0) * RADINDEG) );
+	Scr_AddFloat( cos(Scr_GetFloat(0) * DEG_TO_RAD) );
 }
 
 /*
@@ -3525,7 +3525,7 @@ GScr_sin
 */
 void GScr_sin()
 {
-	Scr_AddFloat( sin(Scr_GetFloat(0) * RADINDEG) );
+	Scr_AddFloat( sin(Scr_GetFloat(0) * DEG_TO_RAD) );
 }
 
 /*

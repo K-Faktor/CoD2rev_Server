@@ -816,7 +816,7 @@ static void BG_Player_DoControllersInternal( DObj *obj, const entityState_t *es,
 
 		tag_origin_angles[PITCH] = tag_origin_angles[PITCH] + es->fTorsoPitch;
 
-		FastSinCos(vTorsoAngles[YAW] * RADINDEG, &s, &c);
+		FastSinCos(vTorsoAngles[YAW] * DEG_TO_RAD, &s, &c);
 
 		tag_origin_offset[PITCH] = (1.0 - c) * -24.0 + tag_origin_offset[PITCH];
 		tag_origin_offset[YAW] = s * -12.0 + tag_origin_offset[YAW];

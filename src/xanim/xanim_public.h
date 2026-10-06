@@ -386,6 +386,12 @@ enum
 
 #define NO_BONEINDEX 0xFF
 
+struct DSurface_s
+{
+	unsigned short modelIndex;
+	unsigned short subMatIndex;
+};
+
 typedef struct DObj_s
 {
 	XAnimTree_s *tree;
@@ -398,8 +404,8 @@ typedef struct DObj_s
 	byte numBones;
 	byte ignoreCollision;
 	XModel *models[DOBJ_MAX_SUBMODELS];
-	byte modelParents[8];
-	byte matOffset[8];
+	byte modelParents[DOBJ_MAX_SUBMODELS];
+	byte matOffset[DOBJ_MAX_SUBMODELS];
 	vec3_t mins;
 	vec3_t maxs;
 } DObj;
@@ -481,7 +487,7 @@ void DObjShutdown();
 void DObjFree(DObj_s *obj);
 void DObjAbort();
 
-void DObjSetControlTagAngles(const DObj_s *obj, int *partBits, unsigned int boneIndex, float *angles);
+void DObjSetControlTagAngles( const DObj_s *obj, int *partBits, unsigned int tagName, const vec3_t angles );
 void DObjSetLocalTag(const DObj_s *obj, int *partBits, unsigned int boneIndex, const float *trans, const float *angles);
 void ConvertQuatToMat(const DObjAnimMat *mat, float axis[3][3]);
 void MatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out);
@@ -524,7 +530,7 @@ void DObjCalcAnim(const DObj_s *obj, int *partBits);
 DObjAnimMat* DObjGetRotTransArray(const DObj_s *obj);
 void DObjCreateDuplicateParts(DObj_s *obj);
 void DObjCalcSkel(DObj_s *obj, int *partBits);
-void DObjTraceline(DObj_s *obj, float *start, float *end, unsigned char *priorityMap, DObjTrace_s *trace);
+void DObjTraceline( DObj *obj, const vec3_t start, const vec3_t end, unsigned char *priorityMap, DObjTrace_s *trace );
 
 void XAnimGetRelDelta(const XAnim_s *anim, unsigned int animIndex, float *rot, float *trans, float startTime, float endTime);
 
@@ -605,7 +611,7 @@ const char* XAnimGetAnimTreeDebugName(const XAnim_s *anims);
 bool XAnimNotetrackExists(const XAnim_s *anims, unsigned int animIndex, unsigned int name);
 
 int DObjHasContents(DObj_s *obj, int contentmask);
-void DObjGeomTraceline(DObj_s *obj, float *localStart, float *localEnd, int contentmask, DObjTrace_s *results);
+void DObjGeomTraceline( DObj *obj, const vec3_t localStart, const vec3_t localEnd, int contentmask, DObjTrace_s *results );
 void DObjDumpInfo(const DObj_s *obj);
 
 int XAnim_ReadShort(const unsigned char **pos);
@@ -616,6 +622,7 @@ void ConsumeQuat(const unsigned char **pos, short *out);
 void QuatMultiplyEquals(const float *in, float *inout);
 void QuatMultiplyReverseEquals(float *in, float *inout);
 void MatrixTransformVectorQuatTransEquals(float *inout, DObjAnimMat *in);
-void InvMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out);
+void LocalInvMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out);
 void DObjCalcTransWeight(DObjAnimMat *Mat);
 void DObjSkelClear( DObj_s *obj );
+void DObjComputeBounds( DObj *obj );

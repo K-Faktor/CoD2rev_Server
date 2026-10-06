@@ -1147,7 +1147,7 @@ float RotationToYaw(const vec2_t rot)
 	r = rot[1] * rot[1] + zz;
 	d = 2.0 / r;
 
-	return (float)(atan2(rot[0] * rot[1] * d, 1.0 - zz * d) * DEGINRAD);
+	return (float)(atan2(rot[0] * rot[1] * d, 1.0 - zz * d) * RAD_TO_DEG);
 }
 
 void MatrixTranspose(const float in[3][3], float out[3][3])

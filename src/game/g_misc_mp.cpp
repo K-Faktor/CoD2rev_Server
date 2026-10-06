@@ -872,7 +872,7 @@ qboolean turret_behind( gentity_t *self, gentity_t *other )
 	Vec3Normalize(dir);
 
 	dot = DotProduct(forward, dir);
-	angle = Q_acos(I_fclamp(dot, -1.0, 1.0)) * DEGINRAD;
+	angle = Q_acos(I_fclamp(dot, -1.0, 1.0)) * RAD_TO_DEG;
 
 	return yawSpan >= angle;
 }

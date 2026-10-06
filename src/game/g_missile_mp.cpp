@@ -357,7 +357,7 @@ G_RunMissile_GetPerturbation
 float G_RunMissile_GetPerturbation( float destabilizationCurvatureMax )
 {
 	assert(destabilizationCurvatureMax < 1000000000.0f && destabilizationCurvatureMax >= 0.0f);
-	return tan(destabilizationCurvatureMax * RADINDEG);
+	return tan(destabilizationCurvatureMax * DEG_TO_RAD);
 }
 
 /*

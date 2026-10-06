@@ -132,7 +132,7 @@ void Bullet_Endpos( float spread, vec3_t end, const weaponParms *wp, float maxRa
 	assert(end);
 	assert(wp);
 
-	float aimOffset = tan( spread * RADINDEG ) * maxRange;
+	float aimOffset = tan( spread * DEG_TO_RAD ) * maxRange;
 	assert(!IS_NAN(aimOffset));
 
 #ifdef LIBCOD
@@ -327,7 +327,7 @@ void Weapon_RocketLauncher_Fire( gentity_t *ent, float spread, weaponParms *wp )
 	assert(wp);
 
 	kickBack[2] = 16;
-	fAimOffset = tan(spread * RADINDEG) * kickBack[2];
+	fAimOffset = tan(spread * DEG_TO_RAD) * kickBack[2];
 
 	gunrandom(&kickBack[1], &kickBack[0]);
 
@@ -564,7 +564,7 @@ void gunrandom( float *x, float *y )
 	theta = randomf() * 360;
 	r = randomf();
 
-	FastSinCos(theta * RADINDEG, &sinT, &cosT);
+	FastSinCos(theta * DEG_TO_RAD, &sinT, &cosT);
 
 	*x = r * cosT;
 	*y = r * sinT;
