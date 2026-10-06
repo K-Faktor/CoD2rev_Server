@@ -67,8 +67,7 @@ Scr_ReadShort
 */
 short Scr_ReadShort( const char **pos )
 {
-	short value;
-	memcpy(&value, *pos, sizeof(value));
+	short value = *(reinterpret_cast<const short *>(*pos));
 	*pos += sizeof(short);
 
 	return value;
@@ -81,8 +80,7 @@ Scr_ReadInt
 */
 int Scr_ReadInt( const char **pos )
 {
-	int value;
-	memcpy(&value, *pos, sizeof(value));
+	int value = *(reinterpret_cast<const int *>(*pos));
 	*pos += sizeof(int);
 
 	return value;
@@ -106,10 +104,10 @@ const float* Scr_ReadVector( const char **pos )
 Scr_ReadIntArray
 ==============
 */
-const int* Scr_ReadIntArray( const char **pos, int count )
+const long int* Scr_ReadIntArray( const char **pos, int count )
 {
-	const int *value = reinterpret_cast<const int *>(*pos);
-	*pos += sizeof(const int) * count;
+	const long int *value = reinterpret_cast<const long int *>(*pos);
+	*pos += sizeof(const long int) * count;
 
 	return value;
 }
@@ -121,8 +119,7 @@ Scr_ReadUnsignedShort
 */
 unsigned short Scr_ReadUnsignedShort( const char **pos )
 {
-	unsigned short value;
-	memcpy(&value, *pos, sizeof(value));
+	unsigned short value = *(reinterpret_cast<const unsigned short *>(*pos));
 	*pos += sizeof(unsigned short);
 
 	return value;
@@ -135,9 +132,8 @@ Scr_ReadUnsigned
 */
 unsigned long Scr_ReadUnsigned( const char **pos )
 {
-	unsigned int value;
-	memcpy(&value, *pos, sizeof(value));
-	*pos += sizeof(unsigned int);
+	unsigned long value = *(reinterpret_cast<const unsigned long *>(*pos));
+	*pos += sizeof(unsigned long);
 
 	return value;
 }
@@ -149,8 +145,7 @@ Scr_ReadFloat
 */
 float Scr_ReadFloat( const char **pos )
 {
-	float value;
-	memcpy(&value, *pos, sizeof(value));
+	float value = *(reinterpret_cast<const float *>(*pos));
 	*pos += sizeof(float);
 
 	return value;
@@ -163,11 +158,10 @@ Scr_ReadCodePos
 */
 const char* Scr_ReadCodePos( const char **pos )
 {
-	uint32_t value;
-	memcpy(&value, *pos, sizeof(value));
-	*pos += sizeof(value);
+	const char *value = *(reinterpret_cast<const char**>(const_cast<char *>(*pos)));
+	*pos += sizeof(const char *);
 
-	return &scrVarPub.programBuffer[value];
+	return value;
 }
 
 /*
@@ -4820,7 +4814,7 @@ loop_dec_top:
 
 		case OP_endswitch:
 			gCaseCount = Scr_ReadUnsignedShort(&pos);
-			pos += gCaseCount * SWITCH_CASE_ENTRY_SIZE;
+			Scr_ReadIntArray(&pos, sizeof(unsigned short) * gCaseCount);
 			continue;
 
 		case OP_vector:

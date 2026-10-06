@@ -3,8 +3,6 @@
 typedef void (*xfunction_t)();
 typedef void (*xmethod_t)(scr_entref_t);
 
-#define SWITCH_CASE_ENTRY_SIZE (sizeof(unsigned int) + sizeof(uint32_t))
-
 typedef struct scr_function_s
 {
 	const char      *name;

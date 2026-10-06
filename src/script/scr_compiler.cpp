@@ -48,12 +48,12 @@ CompareCaseInfo
 */
 int CompareCaseInfo( const void *elem1, const void *elem2 )
 {
-	if ( *(const unsigned int *)elem1 > *(const unsigned int *)elem2 )
+	if ( *(const unsigned *)elem1 > *(const unsigned *)elem2 )
 	{
 		return -1;
 	}
 
-	return *(const unsigned int *)elem1 < *(const unsigned int *)elem2;
+	return *(const unsigned *)elem1 < *(const unsigned *)elem2;
 }
 
 /*
@@ -777,7 +777,7 @@ void ConnectContinueStatements()
 
 	for ( ContinueStatementInfo *statement = scrCompileGlob.currentContinueStatement; statement; statement = statement->next )
 	{
-		*(unsigned int *)statement->codePos = codePos - statement->nextCodePos;
+		*(unsigned *)statement->codePos = codePos - statement->nextCodePos;
 	}
 }
 
@@ -793,7 +793,7 @@ void ConnectBreakStatements()
 
 	for ( BreakStatementInfo *statement = scrCompileGlob.currentBreakStatement; statement; statement = statement->next )
 	{
-		*(unsigned int *)statement->codePos = codePos - statement->nextCodePos;
+		*(unsigned *)statement->codePos = codePos - statement->nextCodePos;
 	}
 }
 
@@ -1175,8 +1175,8 @@ EmitCodepos
 */
 void EmitCodepos( const char *pos )
 {
-	scrCompileGlob.codePos = (byte *)TempMallocAlign( sizeof(uint32_t) );
-	*(uint32_t *)scrCompileGlob.codePos = pos - scrVarPub.programBuffer;
+	scrCompileGlob.codePos = (byte *)TempMallocAlign( sizeof( const char * ) );
+	*(const char **)scrCompileGlob.codePos = pos;
 }
 
 /*
@@ -1239,10 +1239,10 @@ void EmitInteger( int value )
 EmitUnsigned
 ============
 */
-void EmitUnsigned( unsigned int value )
+void EmitUnsigned( unsigned long value )
 {
-	scrCompileGlob.codePos = (byte *)TempMallocAlign( sizeof( unsigned int ) );
-	*(unsigned int *)scrCompileGlob.codePos = value;
+	scrCompileGlob.codePos = (byte *)TempMallocAlign( sizeof( unsigned long ) );
+	*(unsigned long *)scrCompileGlob.codePos = value;
 }
 
 /*
@@ -2883,12 +2883,12 @@ void LinkThread( unsigned int threadCountId, VariableValue *pos, bool allowFarCa
 			CompileError2(value->codePosValue, "unknown function");
 		}
 
-		if ( !allowFarCall && *(uint32_t *)value->codePosValue == FUNC_SCOPE_FAR )
+		if ( !allowFarCall && *(unsigned *)value->codePosValue == FUNC_SCOPE_FAR )
 		{
 			CompileError2(value->codePosValue, "unknown function");
 		}
 
-		*(uint32_t *)value->codePosValue = pos->u.codePosValue - scrVarPub.programBuffer;
+		*(const char **)value->codePosValue = pos->u.codePosValue;
 	}
 }
 
@@ -3593,7 +3593,7 @@ void EmitAnimation( sval_u anim, sval_u sourcePos )
 {
 	EmitOpcode(OP_GetAnimation, 1, CALL_NONE);
 	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
-	EmitUnsigned(0xFFFFFFFF);
+	EmitUnsigned(ULONG_MAX);
 
 	Scr_EmitAnimation((char *)scrCompileGlob.codePos, anim.stringValue, sourcePos.sourcePosValue);
 	Scr_CompileRemoveRefToString(anim.stringValue);
@@ -5040,6 +5040,7 @@ void EmitArrayVariableRef( sval_u expr, sval_u index, sval_u sourcePos, sval_u i
 EmitSwitchStatement
 ============
 */
+#define SWITCH_CASE_ENTRY_SIZE (sizeof(unsigned long) + sizeof(unsigned long))
 void EmitSwitchStatement( sval_u expr, sval_u stmtlist, sval_u sourcePos, bool lastStatement, unsigned int endSourcePos, scr_block_s *block )
 {
 	int num;
@@ -5084,7 +5085,7 @@ void EmitSwitchStatement( sval_u expr, sval_u stmtlist, sval_u sourcePos, bool l
 	EmitShort(0);
 
 	pos2 = (const char *)scrCompileGlob.codePos;
-	*(unsigned int *)pos1 = scrCompileGlob.codePos - (byte *)nextPos1;
+	*(unsigned *)pos1 = scrCompileGlob.codePos - (byte *)nextPos1;
 	pos3 = TempMallocAlignStrict(0);
 
 	for ( num = 0, caseStatement = scrCompileGlob.currentCaseStatement; caseStatement; caseStatement = caseStatement->next, num++ )
@@ -5098,11 +5099,11 @@ void EmitSwitchStatement( sval_u expr, sval_u stmtlist, sval_u sourcePos, bool l
 
 	while ( num > 1 )
 	{
-		if ( *(unsigned int *)pos3 == *(unsigned int *)(pos3 + SWITCH_CASE_ENTRY_SIZE) )
+		if ( *(unsigned *)pos3 == *(unsigned *)(pos3 + SWITCH_CASE_ENTRY_SIZE) )
 		{
 			for ( caseStatement = scrCompileGlob.currentCaseStatement; caseStatement; caseStatement = caseStatement->next )
 			{
-				if ( caseStatement->name == *(unsigned int *)pos3 )
+				if ( caseStatement->name == *(unsigned *)pos3 )
 				{
 					CompileError(caseStatement->sourcePos, "duplicate case expression");
 					return;
@@ -5327,7 +5328,7 @@ void EmitIfElseStatement( sval_u expr, sval_u stmt1, sval_u stmt2, sval_u source
 	if ( !lastStatement )
 	{
 		offset = TempMallocAlignStrict(0) - nextPos2;
-		*(unsigned int *)pos2 = offset;
+		*(unsigned *)pos2 = offset;
 	}
 
 	Scr_InitFromChildBlocks(childBlocks, childCount, block);
