@@ -61,27 +61,12 @@ int CompareCaseInfo( const void *elem1, const void *elem2 )
 GetExpressionCount
 ============
 */
-sval_u* GetExpressionListHead( sval_u exprlist )
-{
-	if ( !exprlist.node || exprlist.node[0].type == ENUM_NOP )
-	{
-		return NULL;
-	}
-
-	if ( exprlist.node && exprlist.node[0].type == ENUM_expression_list )
-	{
-		return exprlist.node[1].node;
-	}
-
-	return exprlist.node[0].node;
-}
-
 int GetExpressionCount( sval_u exprlist )
 {
 	sval_u *node;
 	int expr_count = 0;
 
-	for ( node = GetExpressionListHead( exprlist ); node; node = node[1].node )
+	for ( node = exprlist.node[0].node; node; node = node[1].node )
 	{
 		expr_count++;
 	}
@@ -374,19 +359,17 @@ GetSingleParameter
 */
 sval_u* GetSingleParameter( sval_u exprlist )
 {
-	sval_u *node = GetExpressionListHead( exprlist );
-
-	if ( node == NULL )
+	if ( exprlist.node[0].node == NULL )
 	{
 		return NULL;
 	}
 
-	if ( node[1].node != NULL )
+	if ( exprlist.node[0].node[1].node != NULL )
 	{
 		return NULL;
 	}
 
-	return node;
+	return exprlist.node[0].node;
 }
 
 /*
@@ -399,7 +382,7 @@ int EmitExpressionList( sval_u exprlist, scr_block_s *block )
 	sval_u *node;
 	int expr_count = 0;
 
-	for ( node = GetExpressionListHead( exprlist ); node; node = node[1].node )
+	for ( node = exprlist.node[0].node; node; node = node[1].node )
 	{
 		EmitExpression(node[0].node[0], block);
 		expr_count++;
@@ -653,7 +636,7 @@ void AddExpressionListOpcodePos( sval_u exprlist )
 		return;
 	}
 
-	for ( sval_u *node = GetExpressionListHead( exprlist ); node; node = node[1].node )
+	for ( sval_u *node = exprlist.node[0].node; node; node = node[1].node )
 	{
 		AddOpcodePos( node[0].node[1].sourcePosValue, SOURCE_TYPE_NONE );
 	}
@@ -3417,7 +3400,7 @@ bool EmitOrEvalPrimitiveExpressionList( sval_u exprlist, sval_u sourcePos, Varia
 
 	if ( expr_count == 1 )
 	{
-		return EmitOrEvalExpression(GetExpressionListHead( exprlist )[0].node[0], constValue, block);
+		return EmitOrEvalExpression(exprlist.node[0].node[0].node[0], constValue, block);
 	}
 
 	if ( expr_count != 3 )
@@ -3428,7 +3411,7 @@ bool EmitOrEvalPrimitiveExpressionList( sval_u exprlist, sval_u sourcePos, Varia
 
 	success = true;
 
-	for ( node = GetExpressionListHead( exprlist ); node; node = node[1].node )
+	for ( node = exprlist.node[0].node; node; node = node[1].node )
 	{
 		if ( success )
 		{
@@ -3476,7 +3459,7 @@ bool EvalPrimitiveExpressionList( sval_u exprlist, sval_u sourcePos, VariableCom
 
 	if ( expr_count == 1 )
 	{
-		return EvalExpression(GetExpressionListHead( exprlist )[0].node[0], constValue);
+		return EvalExpression(exprlist.node[0].node[0].node[0], constValue);
 	}
 
 	if ( expr_count != 3 )
@@ -3484,7 +3467,7 @@ bool EvalPrimitiveExpressionList( sval_u exprlist, sval_u sourcePos, VariableCom
 		return false;
 	}
 
-	for ( i = 0, node = GetExpressionListHead( exprlist ); node; node = node[1].node, i++ )
+	for ( i = 0, node = exprlist.node[0].node; node; node = node[1].node, i++ )
 	{
 		if ( !EvalExpression(node[0].node[0], &constValue2[i]) )
 		{
@@ -5156,7 +5139,7 @@ void EmitNotifyStatement( sval_u obj, sval_u exprlist, sval_u sourcePos, sval_u 
 	expr_count = 0;
 	start_node = NULL;
 
-	for ( node = GetExpressionListHead( exprlist ); node; node = node[1].node )
+	for ( node = exprlist.node[0].node; node; node = node[1].node )
 	{
 		start_node = node;
 		EmitExpression(node[0].node[0], block);
